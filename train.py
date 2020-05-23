@@ -6,6 +6,7 @@ import pickle, argparse, json, math
 from utils import remove_empty_slots
 from user import User
 from tqdm import tqdm
+import tensorflow as tf
 
 
 if __name__ == "__main__":
@@ -123,16 +124,18 @@ def train_run():
     period_reward_total = 0
     period_success_total = 0
     success_rate_best = 0.0
-    pbar = tqdm(total = NUM_EP_TRAIN+1)
+    pbar = tqdm(total = NUM_EP_TRAIN)
     while episode < NUM_EP_TRAIN:
         episode_reset()
         episode += 1
         done = False
         state = state_tracker.get_state()
+        count_turn = 0
         while not done:
             next_state, reward, done, success = run_round(state)
             period_reward_total += reward
             state = next_state
+            count_turn += 1
 
         period_success_total += success
 
@@ -155,6 +158,11 @@ def train_run():
             dqn_agent.copy()
             # Train
             dqn_agent.train()
+            writer = tf.summary.create_file_writer("logs")
+            with writer.as_default():
+                tf.summary.scalar("success_rate", success_rate, step=episode)
+                tf.summary.scalar("avg_reward", avg_reward, step=episode)
+                tf.summary.scalar("turns", count_turn, step=episode)
         pbar.update(1)
     print('...Training Ended')
 
