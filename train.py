@@ -5,6 +5,7 @@ from state_tracker import StateTracker
 import pickle, argparse, json, math
 from utils import remove_empty_slots
 from user import User
+from tqdm import tqdm
 
 
 if __name__ == "__main__":
@@ -122,6 +123,7 @@ def train_run():
     period_reward_total = 0
     period_success_total = 0
     success_rate_best = 0.0
+    pbar = tqdm(total = NUM_EP_TRAIN+1)
     while episode < NUM_EP_TRAIN:
         episode_reset()
         episode += 1
@@ -153,6 +155,7 @@ def train_run():
             dqn_agent.copy()
             # Train
             dqn_agent.train()
+        pbar.update(1)
     print('...Training Ended')
 
 
@@ -176,5 +179,5 @@ def episode_reset():
     dqn_agent.reset()
 
 
-warmup_run()
+#warmup_run()
 train_run()
